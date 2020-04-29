@@ -121,7 +121,7 @@ class GameOfLife:
             if count == 3 or (count == 2 and pos in self.cellgrid):
                 new_grid.add(pos)
 
-        if self.auto_adjust:
+        if self.auto_adjust and self.generation_count % 2 == 0:
             self.cellgrid = self._adjust_borders(new_grid)
         else:
             self.cellgrid = new_grid
