@@ -18,7 +18,7 @@ class GameOfLife:
             [0,0,1,0,0],
             [0,0,0,0,0],
         ],
-   
+
         GLIDER = [
             [0,0,0,0,0,0],
             [0,0,0,0,0,0],
@@ -27,7 +27,7 @@ class GameOfLife:
             [0,0,1,1,0,0],
             [0,0,0,0,0,0]
         ],
-   
+
         SMALL_EXPLODER = [
             [0,0,0,0,0],
             [0,0,1,0,0],
@@ -64,11 +64,9 @@ class GameOfLife:
 
     def parseGrid(self, g):
         """
-        Given a 2d grid of integers 'g', keeps only 
+        Given a 2d grid of integers 'g', keeps only
         the 1's x,y positions (ie "alive" cells).
         [[n]..] -> set()
-        
-        (reverse of construct_2d_grid)
         """
         cg = set()
         for y in range(len(g)):
@@ -80,14 +78,10 @@ class GameOfLife:
 
     def construct_2d_grid(self, grid):
         """
-        Given a set() of (x,y) positions, constructs a [minimal*]
-        a 2d grid of 1 or 0 (1 for the existing (x,y) pairs,
-        and 0 otherwise)
-        
-        *if self.auto_adjust is True
+        Given a set() of (x,y) positions, constructs a 2d grid
+        of 1 or 0 (1 for the existing (x,y) pairs, 0 otherwise)
+
         set() -> [[n]...]
-        
-        (reverse of parseGrid)
         """
         xmax, ymax = self._max(grid)
         _sgrid = []
