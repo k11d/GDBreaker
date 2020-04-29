@@ -60,6 +60,13 @@ class GameOfLife:
         ##
 
     def parseGrid(self, g):
+        """
+        Given a 2d grid of integers 'g', keeps only 
+        the 1's x,y positions (ie "alive" cells).
+        [[n]..] -> set()
+        
+        (reverse of construct_2d_grid)
+        """
         cg = set()
         for y in range(len(g)):
             for x in range(len(g[0])):
@@ -68,20 +75,59 @@ class GameOfLife:
         return cg
 
 
+    def construct_2d_grid(self, grid):
+        """
+        Given a set() of (x,y) positions, constructs a [minimal*]
+        a 2d grid of 1 or 0 (1 for the existing (x,y) pairs,
+        and 0 otherwise)
+        
+        *if self.auto_adjust is True
+        set() -> [[n]...]
+        
+        (reverse of parseGrid)
+        """
+        xmax, ymax = self._max(grid)
+        _sgrid = []
+        for y in range(ymax + self.rborder):
+            _row = []
+            for x in range(xmax + self.bborder):
+                if (x,y) in grid:
+                    _row.append(1)
+                else:
+                    _row.append(0)
+            _sgrid.append(_row)
+        return _sgrid
+
+
+    ## public methods
+
+    def printGrid(self):
+        print('\n' * 100)
+        print(f"#G:{self.generation_count}")
+        print(
+            np.matrix(
+                self.construct_2d_grid(self.cellgrid)))
+
+
     def nextState(self):
         self.printGrid()
         self.generation_count += 1
 
         new_grid = set()
-        recalc = self.cellgrid | set(it.chain(*map(self._xyNeighbors, self.cellgrid)))
-        for pos in recalc:
+        aliveOrNeighbors = self.cellgrid | set(it.chain(*map(self._xyNeighbors, self.cellgrid)))
+        for pos in aliveOrNeighbors:
             count = sum((n in self.cellgrid)
                         for n in self._xyNeighbors(pos))
             if count == 3 or (count == 2 and pos in self.cellgrid):
                 new_grid.add(pos)
 
-        self.cellgrid = self.adjust_borders(new_grid)
+        if self.auto_adjust:
+            self.cellgrid = self._adjust_borders(new_grid)
+        else:
+            self.cellgrid = new_grid
 
+
+    ## private methods
 
     def _min(self, grid=None):
         if grid is None:
@@ -97,34 +143,12 @@ class GameOfLife:
                 max(map(lambda p : p[1], grid)))
 
 
-    def adjust_borders(self, grid):
+    def _adjust_borders(self, grid):
         xmin, ymin = self._min(grid)
         tr_xs_key = lambda p : p[0] - xmin + self.lborder
         tr_ys_key = lambda p : p[1] - ymin + self.tborder
         return set(zip(map(tr_xs_key, grid),
                           map(tr_ys_key, grid)))
-
-
-    def construct_2d_grid(self, grid):
-        xmax, ymax = self._max(grid)
-        _sgrid = []
-        for y in range(ymax + self.rborder):
-            _row = []
-            for x in range(xmax + self.bborder):
-                if (x,y) in grid:
-                    _row.append(1)
-                else:
-                    _row.append(0)
-            _sgrid.append(_row)
-        return _sgrid
-
-
-    def printGrid(self):
-        print('\n' * 100)
-        print(f"#G:{self.generation_count}")
-        print(
-            np.matrix(
-                self.construct_2d_grid(self.cellgrid)))
 
 
     def _xyNeighbors(self, xy):
@@ -139,28 +163,29 @@ class GameOfLife:
         yield x + 1, y - 1
 
 
-def runGame(game=None, args=()):
-    if game is None:
-        game = GameOfLife(*args)
-    elif callable(game):
-        game = game(*args)
 
-    while True:
-        try:
-            game.nextState()
-            time.sleep(0.2)
-        except KeyboardInterrupt:
-            print()
-            return 0
-        except Exception as e:
-            print(e)
-            break
+
+
+def main(game=None):
+    if game:
+        while True:
+            try:
+                game.nextState()
+                time.sleep(0.2)
+            except KeyboardInterrupt:
+                print()
+                return 0
+            except Exception as e:
+                print(e)
+                break
     return 1
 
 
 
 if __name__ == '__main__':
-    # runGame(GameOfLife, args=('STABLE',))
-    runGame(GameOfLife, args=('GLIDER',))
+    # main(
+    #     GameOfLife('GLIDER'))
+
+    main(GameOfLife('GLIDER'))
 
 
